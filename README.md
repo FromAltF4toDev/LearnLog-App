@@ -39,13 +39,28 @@ Track your learning progress with this simple single page web application.
 
 ## How to reset localStorage
 
+
 WARNING: the following step will reset your whole localStorage data.
+
+on Desktopbrowser:
 
 -open the developer tools in your browser
 -switch to console
 -enter : localStorage.removeItem("state") and run the command
 -you should see undefinded
 -reset the website trough reset button from browser
+
+on mobile phone:
+
+for example Chrome:
+
+-open Chrome
+-tap ⋮
+-Settings
+-Privacy and security
+-Clear browsing data
+-clear Site data
+-open 
 
 # Author
 
