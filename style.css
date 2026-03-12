@@ -1219,3 +1219,86 @@ header button.active {
     font-size: 22px;
   }
 }
+
+/* =========================
+   TABLES MOBILE FIX
+   ========================= */
+
+.table-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-wrapper table {
+    width: 100%;
+    min-width: 600px;
+    border-collapse: collapse;
+}
+
+.table-wrapper th,
+.table-wrapper td {
+    white-space: nowrap;
+}
+
+/* Damit Flex/Grid-Kinder nicht breiter werden als erlaubt */
+.card,
+.view-section,
+main,
+.notes-table-card,
+.sessions-table-card,
+.tasks-table-card {
+    min-width: 0;
+    max-width: 100%;
+}
+
+/* =========================
+   MOBILE LAYOUT FIX
+   ========================= */
+
+@media (max-width: 768px) {
+
+    /* Falls dein Hauptlayout mit Flex läuft */
+    .app-layout,
+    .layout,
+    .main-layout,
+    .content-layout {
+        flex-direction: column;
+    }
+
+    aside,
+    .sidebar {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    main,
+    .main-content,
+    .content {
+        width: 100%;
+        max-width: 100%;
+        padding: 20px 16px;
+        box-sizing: border-box;
+    }
+
+    .card,
+    .notes-form-card,
+    .notes-table-card,
+    .sessions-table-card,
+    .tasks-table-card {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .table-wrapper table {
+        min-width: 520px;
+    }
+
+    .table-wrapper th,
+    .table-wrapper td {
+        padding: 12px 14px;
+        font-size: 14px;
+    }
+}
