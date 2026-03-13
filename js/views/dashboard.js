@@ -1,8 +1,8 @@
 import { getTaskReminderData } from "./tasks.js";
 
-let reminderIntervalId= null;
+let reminderIntervalId = null;
 
-export function mountDashboardView(state){
+export function mountDashboardView(state) {
   startReminderWatcher(state);
   bindDashboardControls(state);
 }
@@ -12,55 +12,59 @@ export function renderDashboardView(state) {
   renderDashboardStatisticView(state);
 }
 
-
-function startReminderWatcher(state){
-  if(reminderIntervalId!== null){
+function startReminderWatcher(state) {
+  if (reminderIntervalId !== null) {
     clearInterval(reminderIntervalId);
   }
 
-  reminderIntervalId= setInterval ( function(){
-    const dashboard= document.getElementById("view-dashboard");
-    if(!dashboard){
+  reminderIntervalId = setInterval(function () {
+    const dashboard = document.getElementById("view-dashboard");
+    if (!dashboard) {
       return;
     }
-    if(!dashboard.classList.contains("active")){
-      return
+    if (!dashboard.classList.contains("active")) {
+      return;
     }
     renderDashboardReminder(state);
   }, 15000);
 }
 
 function renderDashboardReminder(state) {
-
   const box = document.getElementById("dashboard-reminder-box");
 
   if (!box) {
     return;
   }
 
-  const dueTasks = getTaskReminderData(state);
+  const dueTasks = getTaskReminderData(state).filter(function (task) {
+    return String(task.topicId) === String(state.activeTopicId);
+  });
+
+  if (!state.activeTopicId) {
+    box.innerHTML = "<p>No active topic selected.</p>";
+    return;
+  }
 
   if (dueTasks.length === 0) {
     box.innerHTML = "<p>No reminders right now.</p>";
     return;
   }
 
-  box.innerHTML = dueTasks.map(function(task){
+  box.innerHTML = dueTasks
+    .map(function (task) {
+      const now = Date.now();
 
-    const now = Date.now();
+      if (task.expiredAt && now >= task.expiredAt) {
+        return `<div class="dashboard-warning expired">⚠ ${task.name}</div>`;
+      }
 
-    if (task.expiredAt && now >= task.expiredAt) {
-      return `<div class="dashboard-warning expired">⚠ ${task.name}</div>`;
-    }
+      if (task.reminder && now >= task.reminder) {
+        return `<div class="dashboard-warning reminder">⏰ ${task.name}</div>`;
+      }
 
-    if (task.reminder && now >= task.reminder) {
-      return `<div class="dashboard-warning reminder">⏰ ${task.name}</div>`;
-    }
-
-    return "";
-
-  }).join("");
-
+      return "";
+    })
+    .join("");
 }
 
 function formatDuration(ms) {
@@ -70,10 +74,11 @@ function formatDuration(ms) {
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
 
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+    2,
+    "0"
+  )}:${String(seconds).padStart(2, "0")}`;
 }
-
-
 
 function bindDashboardControls(state) {
   const rangeSelect = document.getElementById("dashboard-range-select");
@@ -94,10 +99,28 @@ export function renderDashboardStatisticView(state) {
     return;
   }
 
+  if (!state.activeTopicId) {
+    renderStat("stat-completed-tasks", 0);
+    renderStat("stat-average-study", formatDuration(0));
+    renderStat("stat-total-study", formatDuration(0));
+    renderStat("stat-average-break", formatDuration(0));
+    renderStat("stat-total-break", formatDuration(0));
+    renderStudyChart([]);
+    return;
+  }
+
   const rangeValue = rangeSelect.value;
 
-  const filteredSessions = getSessionsInRange(state.sessions, rangeValue);
-  const filteredTasks = getCompletedTasksInRange(state.tasks, rangeValue);
+  const topicSessions = state.sessions.filter(function (session) {
+    return String(session.topicId) === String(state.activeTopicId);
+  });
+
+  const topicTasks = state.tasks.filter(function (task) {
+    return String(task.topicId) === String(state.activeTopicId);
+  });
+
+  const filteredSessions = getSessionsInRange(topicSessions, rangeValue);
+  const filteredTasks = getCompletedTasksInRange(topicTasks, rangeValue);
 
   const totalStudyTime = getTotalStudyTime(filteredSessions);
   const averageStudyTime = getAverageStudyTime(filteredSessions);
